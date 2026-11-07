@@ -6,6 +6,7 @@
    ============================================================ */
 const CASA_MARIO_CONFIG={
   currency:"COP",
+  hero:"pepa",            // portada: "pepa" (bolsa dentro de la pepa que se abre) o "bolsa" (bolsa con granos al lado)
   contact:{
     email:null,           // ej. "hola@casamario.co"
     whatsapp:null,        // solo números con indicativo de país, ej. "573001234567"
@@ -32,7 +33,7 @@ skip:"Skip to content",n_inicio:"Home",n_hist:"Our story",n_cafes:"Our coffees",
 a_cart:"Cart",a_menu:"Menu",a_filters:"Filters",
 h_eye:"Finca Las Mercedes · Pitalito, Huila",h_h1:"Memory made into coffee.",co1t:"Origin",co1:"Finca Las Mercedes, Pitalito, Huila.",co2t:"Hand painted",co2:"Botanical oil illustrations on every bag.",co3t:"Family memory",co3:"A name that honors grandfather Mario.",co4t:"To share",co4:"Coffee made for the table and the conversation.",mq1:"Memory made into coffee",mq2:"Finca Las Mercedes",mq3:"Pitalito · Huila · Colombia",mq4:"Specialty coffee",an1:"Specialty coffee from Finca Las Mercedes · Pitalito, Huila",an2:"Place your order on WhatsApp",
 h_lead:"A specialty coffee born in the mountains of Huila, keeping the memory of a family, a house and everyone who always came back to the same table.",
-h_b1:"Discover our coffee",h_b2:"Our story",h_alt:"CASA MARIO coffee bag",h_tag:"Bag: digital representation",
+h_b1:"Discover our coffee",h_b2:"Our story",h_alt:"CASA MARIO coffee bag",pp_hint:"Tap the bean",pp_aria:"Open the coffee bean",h_tag:"Bag: digital representation",
 ph1:"Space for a real photograph",ph1b:"Landscape or coffee grove at Finca Las Mercedes. Replace with your own photograph.",
 p_eye:"Coffee with origin",p_h2a:"Coffee keeps stories.",p_h2b:"We grow them.",
 p_lead:"CASA MARIO is a family brand from Finca Las Mercedes in Pitalito, Huila. Every bag carries the care of the land and the memory of those who have worked it.",p_b:"Meet the origin",
@@ -131,10 +132,10 @@ function renderFilters(){
 }
 function renderGrid(){
   const t=T(),list=P.filter(p=>(fRoast==="all"||!p.roast||p.roast===fRoast)&&(fGrind==="all"||p.grinds.includes(fGrind)));
-  $("#grid").innerHTML=list.map(p=>`<article class="card"><button class="img" data-open="${p.id}" aria-label="${t.view}: ${pName(p)}"><img src="${p.images[0]}" alt="" loading="lazy" width="600" height="548">${p.provisional?`<span class="badge">${t.provisional}</span>`:""}</button>
+  $("#grid").innerHTML=list.map(p=>`<article class="card"><button class="img" data-pid="${p.id}" aria-label="${t.view}: ${pName(p)}"><img src="${p.images[0]}" alt="" loading="lazy" width="600" height="548">${p.provisional?`<span class="badge">${t.provisional}</span>`:""}</button>
   <div class="body"><h3>${pName(p)}</h3><dl class="meta"><dt>${t.origin}</dt><dd>${p.origin}</dd><dt>${t.variety}</dt><dd>${pVal(p.variety)}</dd><dt>${t.process}</dt><dd>${pVal(p.process)}</dd><dt>${t.notes}</dt><dd>${pVal(p.notes)}</dd></dl>
-  <div class="price">${priceLine(p)}</div><div class="row"><button class="btn" data-open="${p.id}">${t.view}</button></div></div></article>`).join("");
-  $$("[data-open]").forEach(b=>b.onclick=()=>openProduct(b.dataset.open));
+  <div class="price">${priceLine(p)}</div><div class="row"><button class="btn" data-pid="${p.id}">${t.view}</button></div></div></article>`).join("");
+  $$("[data-pid]").forEach(b=>b.onclick=()=>openProduct(b.dataset.pid));
 }
 let curP=null,curImg=0;
 function openProduct(id){
@@ -221,12 +222,12 @@ function renderAll(){renderFilters();renderGrid();renderCart();renderStages();re
 const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function splitWords(){$$(".split").forEach(h=>{const t=h.textContent.trim();h.setAttribute("aria-label",t);h.innerHTML=t.split(/\s+/).map((w,i)=>`<span class="w" aria-hidden="true"><span style="--i:${i}">${w}</span></span> `).join("")})}
 let ticking=false;
-function onScroll(){const y=scrollY;$("#hdr").classList.toggle("sc",y>30);$$("[data-sp],.fl,.bagw").forEach(e=>{const sp=parseFloat(getComputedStyle(e).getPropertyValue("--sp"))||0;e.style.setProperty("--py",(y*sp*-1)+"px")})}
+function onScroll(){const y=scrollY;$("#hdr").classList.toggle("sc",y>30);$$("[data-sp],.fl,.bagw,.pepa").forEach(e=>{const sp=parseFloat(getComputedStyle(e).getPropertyValue("--sp"))||0;e.style.setProperty("--py",(y*sp*-1)+"px")})}
 if(!RM){
   addEventListener("scroll",()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;onScroll()})},{passive:true});
   const hf=$(".hero2 .frame");
-  hf.addEventListener("pointermove",e=>{const r=hf.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;$$(".fl,.bagw",hf).forEach(el=>{el.style.setProperty("--mx",x.toFixed(3));el.style.setProperty("--my",y.toFixed(3))})});
-  hf.addEventListener("pointerleave",()=>$$(".fl,.bagw",hf).forEach(el=>{el.style.setProperty("--mx",0);el.style.setProperty("--my",0)}));
+  hf.addEventListener("pointermove",e=>{const r=hf.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;$$(".fl,.bagw,.pepa",hf).forEach(el=>{el.style.setProperty("--mx",x.toFixed(3));el.style.setProperty("--my",y.toFixed(3))})});
+  hf.addEventListener("pointerleave",()=>$$(".fl,.bagw,.pepa",hf).forEach(el=>{el.style.setProperty("--mx",0);el.style.setProperty("--my",0)}));
   document.addEventListener("pointermove",e=>{const c=e.target.closest&&e.target.closest(".card");if(!c)return;const r=c.getBoundingClientRect();c.style.transform=`perspective(900px) rotateY(${((e.clientX-r.left)/r.width-.5)*6}deg) rotateX(${-((e.clientY-r.top)/r.height-.5)*6}deg) translateY(-4px)`});
   document.addEventListener("pointerout",e=>{const c=e.target.closest&&e.target.closest(".card");if(c)c.style.transform=""});
 }else{onScroll()}
@@ -264,6 +265,25 @@ if(!RM){
       b.el.style.transform=`translate3d(${(b.bx+b.x+fx).toFixed(1)}px,${(b.by+b.y+fy+par).toFixed(1)}px,0) rotate(${b.r.toFixed(1)}deg) rotateX(${(Math.sin(t+b.ph)*24).toFixed(1)}deg)`;
     })}
   if(!RM)requestAnimationFrame(tick);else B.forEach(b=>{b.el.style.transform=`translate(${b.bx}px,${b.by}px) rotate(${b.r}deg)`});
+})();
+
+/* ===== pepa: se abre y se mueve ===== */
+(function(){
+  const st=$("#stage3"),pe=$("#pepa"),cr=$("#crumbs");if(!st||!pe)return;
+  st.dataset.hero=(CASA_MARIO_CONFIG.hero==="bolsa")?"bolsa":"pepa";
+  pe.style.setProperty("--d",10);pe.style.setProperty("--sp",.03);
+  function crumbs(){if(RM||!cr.animate)return;cr.innerHTML="";const W=pe.offsetWidth;
+    for(let i=0;i<34;i++){const c=document.createElement("span");c.className="crumb";const sz=3+Math.random()*(i%5?5:9);c.style.width=sz+"px";c.style.height=sz*(.7+Math.random()*.5)+"px";c.style.left=(Math.random()-.5)*W*.5+"px";cr.appendChild(c);
+      const a=Math.random()*Math.PI*2,d=W*(.25+Math.random()*.7),dx=Math.cos(a)*d,dy=Math.sin(a)*d*.8-W*.18;
+      c.animate([{transform:"translate(0,0) rotate(0)",opacity:1},{transform:`translate(${dx}px,${dy}px) rotate(${Math.random()*540}deg)`,opacity:1,offset:.55},{transform:`translate(${dx*1.08}px,${dy+W*.55}px) rotate(${Math.random()*720}deg)`,opacity:0}],{duration:1500+Math.random()*900,easing:"cubic-bezier(.2,.7,.3,1)",fill:"forwards",delay:Math.random()*120})}}
+  function setOpen(o){if(pe.dataset.open===String(o))return;pe.dataset.open=o;if(o)crumbs()}
+  pe.addEventListener("click",()=>setOpen(pe.dataset.open!=="true"));
+  pe.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();setOpen(pe.dataset.open!=="true")}});
+  let auto=false;
+  function tryAuto(){if(auto||st.dataset.hero!=="pepa")return;const r=st.getBoundingClientRect();if(r.width&&r.top<innerHeight*.9){auto=true;setTimeout(()=>setOpen(true),RM?0:1700)}}
+  new IntersectionObserver(es=>{if(es[0].isIntersecting)tryAuto()},{threshold:.25}).observe(st);
+  addEventListener("hashchange",()=>setTimeout(tryAuto,300));
+  setTimeout(tryAuto,600);
 })();
 
 let saved=null;try{saved=localStorage.getItem("cm_lang")}catch(e){}
